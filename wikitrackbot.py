@@ -11,16 +11,20 @@ from pywikibot import pagegenerators
 session = requests.Session()
 session.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0' }
 
-PROD = -1
+PROD = 0
 
 Q_BOLT = 'Q165437'
-Q_RACERES = 'Q166169'
-Q_SECONDS = 'Q166170'
+Q_IAAF = [ 'Q1158', '' ][PROD]
+Q_RACERES = [ 'Q54959061', 'Q166169' ][PROD]
+Q_SECONDS = [ 'Q11574', 'Q166170' ][PROD]
 P_IAAFID = [ 'P1146', 'P76442' ][PROD]
-P_RESULTS = [ '', 'P76745' ][PROD]
+P_RESULTS = [ 'P2501', 'P76745' ][PROD]
 P_SPORTDISC = [ 'P2416', 'P76746', 'P76749' ][PROD]
-P_RACETIME = [ '', 'P27728' ][PROD]
-P_POINTINTIME = [ '', 'P66' ][PROD]
+P_RACETIME = [ 'P2781', 'P27728' ][PROD]
+P_POINTINTIME = [ 'P585', 'P66' ][PROD]
+P_STATEDIN = [ 'P248', '' ][PROD]
+P_RETRIEVED = [ 'P813', '' ][PROD]
+P_REFURL = [ 'P854', '' ][PROD]
 
 site = pywikibot.Site([ 'wikidata', 'test' ][PROD], 'wikidata')
 
@@ -97,20 +101,31 @@ for page in generator:
             except:
                 pres = None
             pwind = p.find('td', { 'data-th': 'Wind' }).text.strip()
-            # add time
+            # add qualifiers
+            quals = []
             if pres:
-                qualifier = pywikibot.Claim(repo, P_RACETIME)
-                qualifier.setTarget(pywikibot.WbQuantity(pres, unit = pywikibot.ItemPage(repo, Q_SECONDS), error = 0.01, site = site))
-                claim.addQualifier(qualifier, summary = 'Adding race time of {}'.format(pres))
+                presqualifier = pywikibot.Claim(repo, P_RACETIME)
+                presqualifier.setTarget(pywikibot.WbQuantity(pres, unit = pywikibot.ItemPage(repo, Q_SECONDS), error = 0.01, site = site))
+                quals.append(presqualifier)
             if pdate:
-                qualifier = pywikibot.Claim(repo, P_POINTINTIME)
-                qualifier.setTarget(pywikibot.WbTime(year = pdate.year, month = pdate.month, day = pdate.day))
-                claim.addQualifier(qualifier, summary = 'Adding race date of {}'.format(pdate))
+                datequalifier = pywikibot.Claim(repo, P_POINTINTIME)
+                datequalifier.setTarget(pywikibot.WbTime(year = pdate.year, month = pdate.month, day = pdate.day))
+                quals.append(datequalifier)
             if pevnt:
-                qualifier = pywikibot.Claim(repo, P_SPORTDISC)
+                evntqualifier = pywikibot.Claim(repo, P_SPORTDISC)
                 if PROD == -1:
-                    qualifier.setTarget(pevnt)
+                    evntqualifier.setTarget(pevnt)
                 else:
                     qevnt = iaafe2wd[pevnt.replace(' Indoor', '')]
-                    qualifier.setTarget(pywikibot.ItemPage(repo, qevnt))
-                claim.addQualifier(qualifier, summary = 'Adding race distance of {}'.format(pevnt))
+                    evntqualifier.setTarget(pywikibot.ItemPage(repo, qevnt))
+                quals.append(evntqualifier)
+            claim.addQualifiers(quals, summary = 'Adding race qualifiers for {} on {}'.format(pevnt, pdate.strptime('%Y-%m-%d')))
+            # add sources
+            now = datetime.datetime.now()
+            retrieved = pywikibot.Claim(repo, P_RETRIEVED)
+            retrieved.setTarget(pywikibot.WbTime(year = now.year, month = now.month, day = now.day))
+            statedin = pywikibot.Claim(repo, P_STATEDIN)
+            statedin.setTarget(pywikibot.ItemPage(repo, Q_IAAF))
+            refurl = pywikibot.Claim(repo, P_REFURL)
+            refurl.setTarget(apiurl)
+            claim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for race from {}'.format(refurl))
