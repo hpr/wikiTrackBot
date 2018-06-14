@@ -49,6 +49,49 @@ data = {
 }
 #item.editEntity(data, summary = 'edited data')
 
+rnd2wd = {
+    'F': 'Q1366722',
+    'F1': 'Q54967487',
+    'F2': 'Q54967487',
+    'F3': 'Q54967487',
+    'F4': 'Q54967487',
+    'F5': 'Q54967487',
+    'F6': 'Q54967487',
+    'F7': 'Q54967487',
+    'F8': 'Q54967487',
+    'F9': 'Q54967487',
+    'F10': 'Q54967487',
+    'H': 'Q2122052',
+    'H1': 'Q2122052',
+    'H2': 'Q2122052',
+    'H3': 'Q2122052',
+    'H4': 'Q2122052',
+    'H5': 'Q2122052',
+    'H6': 'Q2122052',
+    'H7': 'Q2122052',
+    'H8': 'Q2122052',
+    'H9': 'Q2122052',
+    'H10': 'Q2122052',
+    'SF': 'Q599999',
+    'SF1': 'Q599999',
+    'SF2': 'Q599999',
+    'SF3': 'Q599999',
+    'SF4': 'Q599999',
+    'SF5': 'Q599999',
+    'SF6': 'Q599999',
+    'SF7': 'Q599999',
+    'SF8': 'Q599999',
+    'SF9': 'Q599999',
+    'SF10': 'Q599999',
+}
+
+perf2wd = {
+    'DNF': 'Q1210380',
+    'NM': 'Q54967576',
+    'NH': 'Q54967576',
+    'ND': 'Q54967576',
+}
+
 iaafc2wd = {
     'Ostrava Golden Spike': 'Q178299',
     'London Müller Anniversary Games': 'Q791183',
@@ -152,6 +195,7 @@ iaafc2wd = {
     'Monaco IAAF World Athletics Final': { '2003': 'Q3072437', '2004': 'Q3072439', '2005': 'Q3072441' },
     'Berlin ISTAF': 'Q703948',
     'Rovereto Palio Città della Quercia': 'Q3361438',
+    'Boston Marathon': 'Q826038',
 }
 
 iaafe2wd = {
@@ -251,6 +295,7 @@ for page in generator:
         perfs = ysoup.find('tbody').find_all('tr')
         for p in perfs:
             claim.setTarget(pywikibot.ItemPage(repo, Q_RACERES))
+            quals = []
             # parsing
             pdate = p.find('td', { 'data-th': 'Date' }).text.strip()
             pdate = datetime.datetime.strptime(pdate.title(), '%d %b %Y')
@@ -265,6 +310,10 @@ for page in generator:
             except:
                 pplace = None
             pres = p.find('td', { 'data-th': 'Result' }).text.strip()
+            if pres in perf2wd:
+                resqual = pywikibot.Claim(repo, P_RESULTS)
+                resqual.setTarget(pywikibot.ItemPage(perf2wd[pres]))
+                quals.append(resqual)
             reserr = 0.5
             if '.' in pres:
                 reserr = 0.005
@@ -280,7 +329,6 @@ for page in generator:
                 pwind = None
             # add qualifiers
             unit = None
-            quals = []
             if pdate:
                 datequalifier = pywikibot.Claim(repo, P_POINTINTIME)
                 datequalifier.setTarget(pywikibot.WbTime(year = pdate.year, month = pdate.month, day = pdate.day))
@@ -295,6 +343,13 @@ for page in generator:
                     cntqual = pywikibot.Claim(repo, P_COUNTRY)
                     cntqual.setTarget(pywikibot.ItemPage(repo, qcnt))
                     quals.append(cntqual)
+            if prace:
+                if prace in rnd2wd:
+                    rndqual = pywikibot.Claim(repo, P_STAGEREACHED)
+                    rndqual.setTarget(pywikibot.ItemPage(repo, rnd2wd[prace]))
+                    quals.append(rndqual)
+                else:
+                    print('not in rnd2wd: {}'.format(prace))
             if pevnt:
                 if 'Indoor' in pevnt:
                     pevnt = pevnt.replace('Indoor', '').strip()
@@ -327,14 +382,14 @@ for page in generator:
                     qcomp = iaafc2wd[pcomp]
                     if type(qcomp) is dict:
                         qcomp = qcomp[y]
+                    compqual = pywikibot.Claim(repo, P_COMPETITION)
+                    compqual.setTarget(pywikibot.ItemPage(repo, qcomp))
+                    quals.append(compqual)
                 else:
                     print('competition not found: {}'.format(pcomp))
-                compqual = pywikibot.Claim(repo, P_COMPETITION)
-                compqual.setTarget(pywikibot.ItemPage(repo, qcomp))
-                quals.append(compqual)
             if pwind is not None:
                 windqual = pywikibot.Claim(repo, P_WIND)
-                windqual.setTarget(pywikibot.WbQuantity(pwind, unit = pywikibot.ItemPage(repo, Q_MPS), error = 0.05, site = site))
+                windqual.setTarget(pywikibot.WbQuantity(pwind, unit = pywikibot.ItemPage(repo, Q_MPS), site = site))
                 quals.append(windqual)
             if pplace is not None:
                 placequal = pywikibot.Claim(repo, P_RANK)
