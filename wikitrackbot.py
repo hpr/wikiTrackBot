@@ -17,11 +17,11 @@ PROD = 0
 Q_METER = 'Q11573'
 Q_MPS = 'Q182429'
 Q_IAAF = [ 'Q54960205', '' ][PROD]
-Q_RACERES = [ 'Q54959061', 'Q166169' ][PROD]
+Q_RACERES = [ 'Q54959061', 'Q166169' ][PROD] # deprecated
 Q_SECONDS = [ 'Q11574', 'Q166170' ][PROD]
 Q_INDOORS = 'Q10235779'
 P_IAAFID = [ 'P1146', 'P76442' ][PROD]
-P_RESULTS = [ 'P2501', 'P76745' ][PROD]
+P_RESULTS = [ 'P1344', 'P76745' ][PROD] # 2501 "results" -> 1344 "participant of"
 P_SPORTDISC = [ 'P2416', 'P76746', 'P76749' ][PROD]
 P_RACETIME = [ 'P2781', 'P27728' ][PROD]
 P_POINTINTIME = [ 'P585', 'P66' ][PROD]
@@ -36,6 +36,8 @@ P_COMPETITION = 'P5249'
 P_POINTS = 'P1358'
 P_COUNTRY = 'P17'
 P_STAGEREACHED = 'P2443'
+P_COMPCLASS = 'P2094'
+P_STATEDAS = 'P1932'
 
 site = pywikibot.Site([ 'wikidata', 'test' ][PROD], 'wikidata')
 
@@ -294,7 +296,6 @@ for page in generator:
         ysoup = bs4.BeautifulSoup(session.get(apiurl).text, 'html.parser')
         perfs = ysoup.find('tbody').find_all('tr')
         for p in perfs:
-            claim.setTarget(pywikibot.ItemPage(repo, Q_RACERES))
             quals = []
             # parsing
             pdate = p.find('td', { 'data-th': 'Date' }).text.strip()
@@ -311,7 +312,7 @@ for page in generator:
                 pplace = None
             pres = p.find('td', { 'data-th': 'Result' }).text.strip()
             if pres in perf2wd:
-                resqual = pywikibot.Claim(repo, P_RESULTS)
+                resqual = pywikibot.Claim(repo, P_RESULTS) # TODO fix P here
                 resqual.setTarget(pywikibot.ItemPage(perf2wd[pres]))
                 quals.append(resqual)
             reserr = 0.5
@@ -382,11 +383,13 @@ for page in generator:
                     qcomp = iaafc2wd[pcomp]
                     if type(qcomp) is dict:
                         qcomp = qcomp[y]
-                    compqual = pywikibot.Claim(repo, P_COMPETITION)
-                    compqual.setTarget(pywikibot.ItemPage(repo, qcomp))
-                    quals.append(compqual)
+                    claim.setTarget(pywikibot.ItemPage(repo, qcomp))
                 else:
+                    claim.setSnakType('novalue')
                     print('competition not found: {}'.format(pcomp))
+            else:
+                print('something is terribly wrong')
+                exit()
             if pwind is not None:
                 windqual = pywikibot.Claim(repo, P_WIND)
                 windqual.setTarget(pywikibot.WbQuantity(pwind, unit = pywikibot.ItemPage(repo, Q_MPS), site = site))
@@ -404,7 +407,7 @@ for page in generator:
                 quals.append(presqualifier)
             page.addClaim(claim, summary = 'Adding {} race result'.format(y))
             for qua in quals:
-                claim.addQualifier(qua, summary = 'Adding race qualifier for {} on {}'.format(pevnt, pdate.strftime('%Y-%m-%d')))
+                claim.addQualifier(qua, summary = 'Adding athletics performance qualifier for {} on {}'.format(pevnt, pdate.strftime('%Y-%m-%d')))
                 print(qua)
                 time.sleep(2)
             # add sources
@@ -415,4 +418,6 @@ for page in generator:
             statedin.setTarget(pywikibot.ItemPage(repo, Q_IAAF))
             refurl = pywikibot.Claim(repo, P_REFURL)
             refurl.setTarget(apiurl)
-            claim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for race from {}'.format(refurl))
+            statedqual = pywikibot.Claim(repo, P_STATEDAS)
+            statedqual.setTarget(' | '.join([ td.text.strip() for td in p.find_all('td') ]))
+            claim.addSources([ statedin, refurl, retrieved, statedqual ], summary = 'Adding sources for athletics performance from {}'.format(refurl))
