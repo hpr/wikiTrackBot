@@ -23,7 +23,6 @@ Q_INDOORS = 'Q10235779'
 P_IAAFID = [ 'P1146', 'P76442' ][PROD]
 P_RESULTS = [ 'P1344', 'P76745' ][PROD] # 2501 "results" -> 1344 "participant of"
 P_SPORTDISC = [ 'P2416', 'P76746', 'P76749' ][PROD]
-P_RACETIME = [ 'P2781', 'P27728' ][PROD]
 P_POINTINTIME = [ 'P585', 'P66' ][PROD]
 P_STATEDIN = [ 'P248', '' ][PROD]
 P_RETRIEVED = [ 'P813', '' ][PROD]
@@ -31,13 +30,15 @@ P_REFURL = [ 'P854', '' ][PROD]
 P_WIND = 'P5065'
 P_SPORT = 'P641'
 P_RANK = 'P1352'
-P_DISTANCE = 'P2043'
 P_COMPETITION = 'P5249'
-P_POINTS = 'P1358'
 P_COUNTRY = 'P17'
 P_STAGEREACHED = 'P2443'
 P_COMPCLASS = 'P2094'
 P_STATEDAS = 'P1932'
+
+P_RACETIME = [ 'P2781', 'P27728' ][PROD]
+P_POINTS = 'P1358'
+P_DISTANCE = 'P2043'
 
 site = pywikibot.Site([ 'wikidata', 'test' ][PROD], 'wikidata')
 
@@ -95,6 +96,7 @@ perf2wd = {
 }
 
 iaafc2wd = {
+    'Kingston Jamaican Ch.': 'Q55029485',
     'Ostrava Golden Spike': 'Q178299',
     'London Müller Anniversary Games': 'Q791183',
     'London Sainsbury\'s Anniversary Games': 'Q791183',
@@ -105,7 +107,6 @@ iaafc2wd = {
     'Melbourne NITRO Athletics': 'Q29025671',
     'Monaco Herculis': 'Q1250640',
     'London IAAF World Championships in Athletics': 'Q175508',
-    'Rio de Janeiro Olympic Games': 'Q8613',
     'Nassau IAAF World Relays': 'Q926006',
     'New York adidas Grand Prix': 'Q240958',
     'New York Reebok Grand Prix': 'Q240958',
@@ -119,7 +120,6 @@ iaafc2wd = {
     'Moskva IAAF World Championships': 'Q842232',
     'Zürich Weltklasse': 'Q661729',
     'Bruxelles Memorial Van Damme': 'Q1426540',
-    'London Olympic Games': { '1908': 'Q8111', '1948': 'Q8403', '2012': 'Q8577' },
     'Lausanne Athletissima': 'Q665517',
     'Stockholm DN Galan': 'Q1154703',
     'Daegu IAAF World Championships': 'Q208675',
@@ -135,7 +135,6 @@ iaafc2wd = {
     'Kingston Jamaica International': 'Q2659410',
     'Kingston Jamaica Invitational': 'Q2659410',
     'Athina Grand Prix Tsiklitiria': 'Q1769244',
-    'Beijing Olympic Games': 'Q8567',
     'Sheffield Norwich Union British Grand Prix': 'Q746741',
     'Gateshead AVIVA British Grand Prix': 'Q746741',
     'Gateshead Norwich Union British Grand Prix': 'Q746741',
@@ -145,7 +144,6 @@ iaafc2wd = {
     'Helsinki IAAF World Championships': { '1983': 'Q509599', '2005': 'Q630307' },
     'Hamilton CARIFTA Games': { '1975': 'Q4576552', '1980': 'Q4579188', '2004': 'Q4602580', '2012': 'Q4624983' },
     'Bridgetown Carifta Games U17': { '1972': 'Q4574956', '1977': 'Q4577589', '1985': 'Q4582223', '1989': 'Q4585097', '1994': 'Q4589274', '1997': 'Q4592277', '2001': 'Q4598538' },
-    'Athens Olympic Games': { '1896': 'Q8080', '2004': 'Q8558' },
     'Kingston Jamaican HS Ch. Class 1.': 'Q6044695',
     'Kingston Jamaican HS Ch. Class 2': 'Q6044695',
     'Port of Spain Carifta Games Jun.': { '1973': 'Q4575479', '1987': 'Q4583595', '1991': 'Q4586747', '1998': 'Q4593419', '2003': 'Q4601182' },
@@ -190,10 +188,17 @@ iaafc2wd = {
     'Sheffield BUPA Great Yorkshire Run': 'Q5600317',
     'Utrecht Singelloop': 'Q2289166',
     'Madrid San Silvestre Vallecana': 'Q1549242',
+    
     'St-Etienne IAAF World Cross Country Championships': 'Q1141463',
     'Bruxelles IAAF World Cross Country Championships': 'Q1141461',
     'Lausanne IAAF World Cross Country Championships': 'Q675257',
     'Dublin IAAF World Cross Country Championships': 'Q127283',
+
+    'Athens Olympic Games': { '1896': 'Q339297', '2004': 'Q339297' }, #{ '1896': 'Q8080', '2004': 'Q8558' },
+    'Beijing Olympic Games': 'Q189941', #'Q8567',
+    'London Olympic Games': { '1908': 'Q733330', '1948': 'Q515125', '2012': 'Q185262' }, #{ '1908': 'Q8111', '1948': 'Q8403', '2012': 'Q8577' },
+    'Rio de Janeiro Olympic Games': 'Q18193712', #'Q8613',
+    
     'Monaco IAAF World Athletics Final': { '2003': 'Q3072437', '2004': 'Q3072439', '2005': 'Q3072441' },
     'Berlin ISTAF': 'Q703948',
     'Rovereto Palio Città della Quercia': 'Q3361438',
@@ -272,6 +277,13 @@ generator = site.preloadpages(
 
 generator = [ pywikibot.ItemPage(repo, 'Q1189') ]
 
+edits = 195
+
+def incedits():
+    global edits
+    edits += 1
+    print('{} edits'.format(edits))
+
 for page in generator:
     itemd = page.get()
     #pprint.pprint(itemd)
@@ -298,6 +310,12 @@ for page in generator:
         for p in perfs:
             quals = []
             # parsing
+            statedqual = pywikibot.Claim(repo, P_STATEDAS)
+            statedqual_s = (' ; '.join([ td.text.strip() for td in p.find_all('td') ])[:254]).strip()
+            print(statedqual_s)
+            statedqual.setTarget(statedqual_s)
+            quals.append(statedqual)
+
             pdate = p.find('td', { 'data-th': 'Date' }).text.strip()
             pdate = datetime.datetime.strptime(pdate.title(), '%d %b %Y')
             pcomp = p.find('td', { 'data-th': 'Competition' }).text.strip()
@@ -313,7 +331,7 @@ for page in generator:
             pres = p.find('td', { 'data-th': 'Result' }).text.strip()
             if pres in perf2wd:
                 resqual = pywikibot.Claim(repo, P_RESULTS) # TODO fix P here
-                resqual.setTarget(pywikibot.ItemPage(perf2wd[pres]))
+                resqual.setTarget(pywikibot.ItemPage(repo, perf2wd[pres]))
                 quals.append(resqual)
             reserr = 0.5
             if '.' in pres:
@@ -331,6 +349,17 @@ for page in generator:
             # add qualifiers
             unit = None
             if pdate:
+                # important: start skipping logic based on date matches here
+                skip = False
+                if P_RESULTS in itemd['claims']:
+                    for resclaim in itemd['claims'][P_RESULTS]:
+                        if P_POINTINTIME in resclaim.qualifiers:
+                            timeq = resclaim.qualifiers[P_POINTINTIME][0].getTarget()
+                            timeq = datetime.datetime(timeq.year, timeq.month, timeq.day)
+                            if timeq == pdate:
+                                skip = True
+                if skip:
+                    continue
                 datequalifier = pywikibot.Claim(repo, P_POINTINTIME)
                 datequalifier.setTarget(pywikibot.WbTime(year = pdate.year, month = pdate.month, day = pdate.day))
                 quals.append(datequalifier)
@@ -383,6 +412,7 @@ for page in generator:
                     qcomp = iaafc2wd[pcomp]
                     if type(qcomp) is dict:
                         qcomp = qcomp[y]
+                    claim.setSnakType('value')
                     claim.setTarget(pywikibot.ItemPage(repo, qcomp))
                 else:
                     claim.setSnakType('novalue')
@@ -406,9 +436,10 @@ for page in generator:
                 presqualifier.setTarget(pywikibot.WbQuantity(pres, unit = unit, error = reserr, site = site))
                 quals.append(presqualifier)
             page.addClaim(claim, summary = 'Adding {} race result'.format(y))
+            incedits()
             for qua in quals:
                 claim.addQualifier(qua, summary = 'Adding athletics performance qualifier for {} on {}'.format(pevnt, pdate.strftime('%Y-%m-%d')))
-                print(qua)
+                incedits()
                 time.sleep(2)
             # add sources
             now = datetime.datetime.now()
@@ -418,6 +449,5 @@ for page in generator:
             statedin.setTarget(pywikibot.ItemPage(repo, Q_IAAF))
             refurl = pywikibot.Claim(repo, P_REFURL)
             refurl.setTarget(apiurl)
-            statedqual = pywikibot.Claim(repo, P_STATEDAS)
-            statedqual.setTarget(' | '.join([ td.text.strip() for td in p.find_all('td') ]))
-            claim.addSources([ statedin, refurl, retrieved, statedqual ], summary = 'Adding sources for athletics performance from {}'.format(refurl))
+            claim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for athletics performance from {}'.format(refurl))
+            incedits()
