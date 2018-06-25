@@ -440,6 +440,7 @@ for page in generator:
             #
             # IMPORTANT competition and event item creation
             #
+            qcomp = None
             if pcomp and qevnt:
                 ypcomp = '{} {}'.format(y, pcomp)
                 if pcomp in iaafc2wd:
@@ -534,6 +535,10 @@ for page in generator:
             #
             # end competition and event item creation
             #
+            if qcomp:
+                compartqual = pywikibot.Claim(repo, P_PARTOF)
+                compartqual.setTarget(pywikibot.ItemPage(qcomp))
+                quals.append(compartqual)
             if pwind is not None:
                 windqual = pywikibot.Claim(repo, P_WIND)
                 windqual.setTarget(pywikibot.WbQuantity(pwind, unit = pywikibot.ItemPage(repo, Q_MPS), site = site))
