@@ -47,6 +47,7 @@ P_PARTOF = 'P361'
 P_OBJECTHASROLE = 'P3831'
 P_GENDER = 'P21'
 P_COMPCLASS = 'P2094'
+P_PARTICIPANT = 'P710'
 
 P_RACETIME = [ 'P2781', 'P27728' ][PROD]
 P_POINTS = 'P1358'
@@ -289,7 +290,7 @@ generator = site.preloadpages(
 
 generator = [ pywikibot.ItemPage(repo, 'Q1189') ]
 
-edits = 195
+edits = 0
 
 def incedits():
     global edits
@@ -451,7 +452,7 @@ for page in generator:
                     print('competition not found, creating: {}'.format(pcomp))
                     ypcomp_item = pywikibot.ItemPage(site)
                     ypcomp_item.editEntity({
-                        'labels': { 'en': pcomp },
+                        'labels': { 'en': ypcomp },
                         'descriptions': { 'en': 'Athletics competition in {}'.format(y) },
                     }, summary = 'Creating athletics competition')
                     incedits()
@@ -465,13 +466,14 @@ for page in generator:
                         ypcomp_item.addClaim(cntclaim, summary = 'adding country to athletics meeting')
                         incedits()
                     qcomp = ypcomp_item.getID()
-                    csv.writer(open('cachedmeets.csv', 'a', newline = '')).writerow(ypcomp, qcomp)
+                    csv.writer(open('cachedmeets.csv', 'a', newline = '')).writerow([ ypcomp, qcomp ])
                     cachedmeets[ypcomp] = qcomp
                 # now we have qcomp, time to find or create qevntcomp
                 qcomp_item = pywikibot.ItemPage(repo, qcomp)
                 qevntcomp = None
-                if P_HASPART in qcomp_item['claims']:
-                    for partclaim in qcomp_item['claims'][P_HASPART]:
+                qcomp_itemd = qcomp_item.get()
+                if P_HASPART in qcomp_itemd['claims']:
+                    for partclaim in qcomp_itemd['claims'][P_HASPART]:
                         if P_OBJECTHASROLE in partclaim.qualifiers:
                             hasgender = False
                             hasqevnt = False
@@ -485,8 +487,10 @@ for page in generator:
                                 break
                 if not qevntcomp:
                     qevntcomp_item = pywikibot.ItemPage(site)
+                    qevntcomp_label = '{} - {} {}'.format(ypcomp, 'Women\'s' if gender == Q_FEMALE else 'Men\'s', pywikibot.ItemPage(repo, qevnt).get()['labels']['en'])
+                    print('CREATING: ' + qevntcomp_label)
                     qevntcomp_item.editEntity({
-                        'labels': { 'en': '{} - {} {}'.format(ypcomp, 'Women\'s' if gender == Q_FEMALE else 'Men\'s', qevnt) },
+                        'labels': { 'en': qevntcomp_label },
                         'descriptions': { 'en': 'Athletics discipline event at an athletics meeting' },
                     }, summary = 'Creating athletics event item')
                     incedits()
@@ -505,19 +509,23 @@ for page in generator:
                     incedits()
                     partofclaim = pywikibot.Claim(repo, P_PARTOF)
                     partofclaim.setTarget(pywikibot.ItemPage(repo, qcomp))
-                    qevntcomp.addClaim(partofclaim, summary = 'Adding part of claim to athletics event')
+                    qevntcomp_item.addClaim(partofclaim, summary = 'Adding part of claim to athletics event')
                     incedits()
                     discclaim = pywikibot.Claim(repo, P_COMPCLASS)
                     discclaim.setTarget(pywikibot.ItemPage(repo, qevnt))
-                    qevntcomp.addClaim(discclaim, summary = 'Adding sports discipline to athletics event')
+                    qevntcomp_item.addClaim(discclaim, summary = 'Adding sports discipline to athletics event')
                     incedits()
                     genclaim = pywikibot.Claim(repo, P_COMPCLASS)
                     genclaim.setTarget(pywikibot.ItemPage(repo, gender))
-                    qevntcomp.addClaim(genclaim, summary = 'Adding gender to athletics event')
+                    qevntcomp_item.addClaim(genclaim, summary = 'Adding gender to athletics event')
                     incedits()
                     instanceclass = pywikibot.Claim(repo, P_INSTANCEOF)
                     instanceclass.setTarget(pywikibot.ItemPage(repo, Q_ATHLETICSMEETING))
-                    qevntcomp.addClaim(instanceclass, summary = 'Adding instance of athletics meeting to athletics event')
+                    qevntcomp_item.addClaim(instanceclass, summary = 'Adding instance of athletics meeting to athletics event')
+                    incedits()
+                    particlaim = pywikibot.Claim(repo, P_PARTICIPANT)
+                    particlaim.setTarget(pywikibot.ItemPage(repo, page.getID()))
+                    qevntcomp_item.addClaim(particlaim, summary = 'Add participant to athletics event at athletics meeting')
                     incedits()
                 claim.setTarget(pywikibot.ItemPage(repo, qevntcomp))
             else:
@@ -546,7 +554,11 @@ for page in generator:
             for qua in quals:
                 claim.addQualifier(qua, summary = 'Adding athletics performance qualifier for {} on {}'.format(pevnt, pdate.strftime('%Y-%m-%d')))
                 incedits()
-                time.sleep(2)
+                time.sleep(0.5)
+                if particlaim:
+                    particlaim.addQualifier(qua, summary = 'Adding athletics performance qualifier to event for {} on {}'.format(pevnt, pdate.strftime('%Y-%m-%d')))
+                    incedits()
+                time.sleep(0.5)
             # add sources
             now = datetime.datetime.now()
             retrieved = pywikibot.Claim(repo, P_RETRIEVED)
@@ -557,3 +569,6 @@ for page in generator:
             refurl.setTarget(apiurl)
             claim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for athletics performance from {}'.format(refurl))
             incedits()
+            if particlaim:
+                particlaim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for athletics performance from {}'.format(refurl))
+                incedits()
