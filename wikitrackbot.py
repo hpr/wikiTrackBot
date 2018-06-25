@@ -290,7 +290,7 @@ generator = site.preloadpages(
 
 generator = [ pywikibot.ItemPage(repo, 'Q1189') ]
 
-edits = 0
+edits = 183
 
 def incedits():
     global edits
@@ -441,6 +441,7 @@ for page in generator:
             # IMPORTANT competition and event item creation
             #
             qcomp = None
+            particlaim = None
             if pcomp and qevnt:
                 ypcomp = '{} {}'.format(y, pcomp)
                 if pcomp in iaafc2wd:
@@ -524,10 +525,11 @@ for page in generator:
                     instanceclass.setTarget(pywikibot.ItemPage(repo, Q_ATHLETICSMEETING))
                     qevntcomp_item.addClaim(instanceclass, summary = 'Adding instance of athletics meeting to athletics event')
                     incedits()
-                    particlaim = pywikibot.Claim(repo, P_PARTICIPANT)
-                    particlaim.setTarget(pywikibot.ItemPage(repo, page.getID()))
-                    qevntcomp_item.addClaim(particlaim, summary = 'Add participant to athletics event at athletics meeting')
-                    incedits()
+                qevntcomp_item = pywikibot.ItemPage(repo, qevntcomp)
+                particlaim = pywikibot.Claim(repo, P_PARTICIPANT)
+                particlaim.setTarget(pywikibot.ItemPage(repo, page.getID()))
+                qevntcomp_item.addClaim(particlaim, summary = 'Add participant to athletics event at athletics meeting')
+                incedits()
                 claim.setTarget(pywikibot.ItemPage(repo, qevntcomp))
             else:
                 print('something is terribly wrong')
@@ -537,7 +539,7 @@ for page in generator:
             #
             if qcomp:
                 compartqual = pywikibot.Claim(repo, P_PARTOF)
-                compartqual.setTarget(pywikibot.ItemPage(qcomp))
+                compartqual.setTarget(pywikibot.ItemPage(repo, qcomp))
                 quals.append(compartqual)
             if pwind is not None:
                 windqual = pywikibot.Claim(repo, P_WIND)
@@ -572,8 +574,8 @@ for page in generator:
             statedin.setTarget(pywikibot.ItemPage(repo, Q_IAAF))
             refurl = pywikibot.Claim(repo, P_REFURL)
             refurl.setTarget(apiurl)
-            claim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for athletics performance from {}'.format(refurl))
+            claim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for athletics performance from {}'.format(apiurl))
             incedits()
             if particlaim:
-                particlaim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for athletics performance from {}'.format(refurl))
+                particlaim.addSources([ statedin, refurl, retrieved ], summary = 'Adding sources for athletics performance from {}'.format(apiurl))
                 incedits()
