@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import bs4
+import csv
 import time
 import pprint
 import iaafcc
@@ -10,7 +11,7 @@ import pywikibot
 from pywikibot import pagegenerators
 
 session = requests.Session()
-session.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0' }
+session.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36' }
 
 PROD = 0
 
@@ -20,6 +21,11 @@ Q_IAAF = [ 'Q54960205', '' ][PROD]
 Q_RACERES = [ 'Q54959061', 'Q166169' ][PROD] # deprecated
 Q_SECONDS = [ 'Q11574', 'Q166170' ][PROD]
 Q_INDOORS = 'Q10235779'
+Q_ATHLETICSMEETING = 'Q11783626'
+
+Q_FEMALE = 'Q6581072'
+Q_MALE = 'Q6581097'
+
 P_IAAFID = [ 'P1146', 'P76442' ][PROD]
 P_RESULTS = [ 'P1344', 'P76745' ][PROD] # 2501 "results" -> 1344 "participant of"
 P_SPORTDISC = [ 'P2416', 'P76746', 'P76749' ][PROD]
@@ -35,6 +41,12 @@ P_COUNTRY = 'P17'
 P_STAGEREACHED = 'P2443'
 P_COMPCLASS = 'P2094'
 P_STATEDAS = 'P1932'
+P_INSTANCEOF = 'P31'
+P_HASPART = 'P527'
+P_PARTOF = 'P361'
+P_OBJECTHASROLE = 'P3831'
+P_GENDER = 'P21'
+P_COMPCLASS = 'P2094'
 
 P_RACETIME = [ 'P2781', 'P27728' ][PROD]
 P_POINTS = 'P1358'
@@ -284,7 +296,13 @@ def incedits():
     edits += 1
     print('{} edits'.format(edits))
 
+cachedmeets = { row[0]: row[1] for row in csv.reader(open('cachedmeets.csv', newline = '')) }
+iaaf2gen = { row[0]: row[1] for row in csv.reader(open('iaaf2gen.csv', newline = '')) }
+
 for page in generator:
+    gender = None
+    iaafid = None
+    aaid = None
     itemd = page.get()
     #pprint.pprint(itemd)
     print(itemd['labels']['en'] if 'en' in itemd['labels'] else itemd['labels'])
@@ -301,6 +319,15 @@ for page in generator:
         aaid = aaid['data-aaid']
     else:
         print('skipped for no aaid')
+        continue
+    if iaafid in iaaf2gen:
+        gender = iaaf2gen[iaafid] # 'Men' or 'Women'
+        if gender not in [ 'Men', 'Women' ]:
+            print('skipped for error in gender')
+            continue
+        gender = Q_FEMALE if gender == 'Women' else Q_MALE
+    else:
+        print('skipped for no gender')
         continue
     years = [ op['value'] for op in iaafs.find('select', { 'name': 'resultsByYear' }).find_all('option') ]
     for y in years:
@@ -365,6 +392,7 @@ for page in generator:
                 quals.append(datequalifier)
             indoor = False
             field = False
+            qcnt = None
             if pcnt:
                 if pcnt not in cnt2wd:
                     print('Not in cnt2wd: {}'.format(pcnt))
@@ -380,6 +408,7 @@ for page in generator:
                     quals.append(rndqual)
                 else:
                     print('not in rnd2wd: {}'.format(prace))
+            qevnt = None
             if pevnt:
                 if 'Indoor' in pevnt:
                     pevnt = pevnt.replace('Indoor', '').strip()
@@ -407,19 +436,96 @@ for page in generator:
                 indqualifier = pywikibot.Claim(repo, P_SPORT)
                 indqualifier.setTarget(pywikibot.ItemPage(repo, Q_INDOORS))
                 quals.append(indqualifier)
-            if pcomp:
+            #
+            # IMPORTANT competition and event item creation
+            #
+            if pcomp and qevnt:
+                ypcomp = '{} {}'.format(y, pcomp)
                 if pcomp in iaafc2wd:
                     qcomp = iaafc2wd[pcomp]
                     if type(qcomp) is dict:
                         qcomp = qcomp[y]
-                    claim.setSnakType('value')
-                    claim.setTarget(pywikibot.ItemPage(repo, qcomp))
+                elif ypcomp in cachedmeets:
+                    qcomp = cachedmeets[ypcomp]
                 else:
-                    claim.setSnakType('novalue')
-                    print('competition not found: {}'.format(pcomp))
+                    print('competition not found, creating: {}'.format(pcomp))
+                    ypcomp_item = pywikibot.ItemPage(site)
+                    ypcomp_item.editEntity({
+                        'labels': { 'en': pcomp },
+                        'descriptions': { 'en': 'Athletics competition in {}'.format(y) },
+                    }, summary = 'Creating athletics competition')
+                    incedits()
+                    instanceclaim = pywikibot.Claim(repo, P_INSTANCEOF)
+                    instanceclaim.setTarget(pywikibot.ItemPage(repo, Q_ATHLETICSMEETING))
+                    ypcomp_item.addClaim(instanceclaim, summary = 'adding: instance of "athletics meeting"')
+                    incedits()
+                    if qcnt:
+                        cntclaim = pywikibot.Claim(repo, P_COUNTRY)
+                        cntclaim.setTarget(pywikibot.ItemPage(repo, qcnt))
+                        ypcomp_item.addClaim(cntclaim, summary = 'adding country to athletics meeting')
+                        incedits()
+                    qcomp = ypcomp_item.getID()
+                    csv.writer(open('cachedmeets.csv', 'a', newline = '')).writerow(ypcomp, qcomp)
+                    cachedmeets[ypcomp] = qcomp
+                # now we have qcomp, time to find or create qevntcomp
+                qcomp_item = pywikibot.ItemPage(repo, qcomp)
+                qevntcomp = None
+                if P_HASPART in qcomp_item['claims']:
+                    for partclaim in qcomp_item['claims'][P_HASPART]:
+                        if P_OBJECTHASROLE in partclaim.qualifiers:
+                            hasgender = False
+                            hasqevnt = False
+                            for role in partclaim.qualifiers[P_OBJECTHASROLE]:
+                                if role.getTarget().getID() == gender:
+                                    hasgender = True
+                                if role.getTarget().getID() == qevnt:
+                                    hasqevnt = True
+                            if hasgender and hasqevnt:
+                                qevntcomp = partclaim.getTarget().getID()
+                                break
+                if not qevntcomp:
+                    qevntcomp_item = pywikibot.ItemPage(site)
+                    qevntcomp_item.editEntity({
+                        'labels': { 'en': '{} - {} {}'.format(ypcomp, 'Women\'s' if gender == Q_FEMALE else 'Men\'s', qevnt) },
+                        'descriptions': { 'en': 'Athletics discipline event at an athletics meeting' },
+                    }, summary = 'Creating athletics event item')
+                    incedits()
+                    qevntcomp = qevntcomp_item.getID()
+                    partclaim2 = pywikibot.Claim(repo, P_HASPART)
+                    partclaim2.setTarget(pywikibot.ItemPage(repo, qevntcomp))
+                    qcomp_item.addClaim(partclaim2, summary = 'Adding part of claim to athletics meeting')
+                    incedits()
+                    rolequal_gender = pywikibot.Claim(repo, P_OBJECTHASROLE)
+                    rolequal_gender.setTarget(pywikibot.ItemPage(repo, gender))
+                    partclaim2.addQualifier(rolequal_gender, summary = 'Adding gender role to athletics event')
+                    incedits()
+                    rolequal_event = pywikibot.Claim(repo, P_OBJECTHASROLE)
+                    rolequal_event.setTarget(pywikibot.ItemPage(repo, qevnt))
+                    partclaim2.addQualifier(rolequal_event, summary = 'Adding sports discipline role to athletics event')
+                    incedits()
+                    partofclaim = pywikibot.Claim(repo, P_PARTOF)
+                    partofclaim.setTarget(pywikibot.ItemPage(repo, qcomp))
+                    qevntcomp.addClaim(partofclaim, summary = 'Adding part of claim to athletics event')
+                    incedits()
+                    discclaim = pywikibot.Claim(repo, P_COMPCLASS)
+                    discclaim.setTarget(pywikibot.ItemPage(repo, qevnt))
+                    qevntcomp.addClaim(discclaim, summary = 'Adding sports discipline to athletics event')
+                    incedits()
+                    genclaim = pywikibot.Claim(repo, P_COMPCLASS)
+                    genclaim.setTarget(pywikibot.ItemPage(repo, gender))
+                    qevntcomp.addClaim(genclaim, summary = 'Adding gender to athletics event')
+                    incedits()
+                    instanceclass = pywikibot.Claim(repo, P_INSTANCEOF)
+                    instanceclass.setTarget(pywikibot.ItemPage(repo, Q_ATHLETICSMEETING))
+                    qevntcomp.addClaim(instanceclass, summary = 'Adding instance of athletics meeting to athletics event')
+                    incedits()
+                claim.setTarget(pywikibot.ItemPage(repo, qevntcomp))
             else:
                 print('something is terribly wrong')
                 exit()
+            #
+            # end competition and event item creation
+            #
             if pwind is not None:
                 windqual = pywikibot.Claim(repo, P_WIND)
                 windqual.setTarget(pywikibot.WbQuantity(pwind, unit = pywikibot.ItemPage(repo, Q_MPS), site = site))
