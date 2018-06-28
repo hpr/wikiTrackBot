@@ -13,26 +13,24 @@ from pywikibot import pagegenerators
 session = requests.Session()
 session.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36' }
 
-PROD = 0
-
 Q_METER = 'Q11573'
 Q_MPS = 'Q182429'
-Q_IAAF = [ 'Q54960205', '' ][PROD]
-Q_RACERES = [ 'Q54959061', 'Q166169' ][PROD] # deprecated
-Q_SECONDS = [ 'Q11574', 'Q166170' ][PROD]
+Q_IAAF = 'Q54960205'
+Q_RACERES = 'Q54959061' # deprecated
+Q_SECONDS = 'Q11574'
 Q_INDOORS = 'Q10235779'
 Q_ATHLETICSMEETING = 'Q11783626'
 
 Q_FEMALE = 'Q6581072'
 Q_MALE = 'Q6581097'
 
-P_IAAFID = [ 'P1146', 'P76442' ][PROD]
-P_RESULTS = [ 'P1344', 'P76745' ][PROD] # 2501 "results" -> 1344 "participant of"
-P_SPORTDISC = [ 'P2416', 'P76746', 'P76749' ][PROD]
-P_POINTINTIME = [ 'P585', 'P66' ][PROD]
-P_STATEDIN = [ 'P248', '' ][PROD]
-P_RETRIEVED = [ 'P813', '' ][PROD]
-P_REFURL = [ 'P854', '' ][PROD]
+P_IAAFID = 'P1146'
+P_RESULTS = 'P1344' # 2501 "results" -> 1344 "participant of"
+P_SPORTDISC = 'P2416'
+P_POINTINTIME = 'P585'
+P_STATEDIN = 'P248'
+P_RETRIEVED = 'P813'
+P_REFURL = 'P854'
 P_WIND = 'P5065'
 P_SPORT = 'P641'
 P_RANK = 'P1352'
@@ -49,21 +47,13 @@ P_GENDER = 'P21'
 P_COMPCLASS = 'P2094'
 P_PARTICIPANT = 'P710'
 
-P_RACETIME = [ 'P2781', 'P27728' ][PROD]
+P_RACETIME = 'P2781'
 P_POINTS = 'P1358'
 P_DISTANCE = 'P2043'
 
-site = pywikibot.Site([ 'wikidata', 'test' ][PROD], 'wikidata')
+site = pywikibot.Site('wikidata', 'wikidata')
 
 repo = site.data_repository()
-
-data = {
-    'labels': { 'en': 'Usain Bolt' },
-    'descriptions': { 'en': 'Jamaican sprinter' },
-    'aliases': { 'en': [ 'Lightning Bolt' ] },
-    'sitelinks': [ { 'site': 'enwiki', 'title': 'Usain Bolt' } ],
-}
-#item.editEntity(data, summary = 'edited data')
 
 rnd2wd = {
     'F': 'Q1366722',
