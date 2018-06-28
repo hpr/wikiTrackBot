@@ -20,6 +20,7 @@ Q_RACERES = 'Q54959061' # deprecated
 Q_SECONDS = 'Q11574'
 Q_INDOORS = 'Q10235779'
 Q_ATHLETICSMEETING = 'Q11783626'
+Q_POINTS = 'Q24038885'
 
 Q_FEMALE = 'Q6581072'
 Q_MALE = 'Q6581097'
@@ -363,10 +364,6 @@ for page in generator:
             except:
                 pplace = None
             pres = p.find('td', { 'data-th': 'Result' }).text.strip()
-            if pres in perf2wd:
-                resqual = pywikibot.Claim(repo, P_RESULTS) # TODO fix P here
-                resqual.setTarget(pywikibot.ItemPage(repo, perf2wd[pres]))
-                quals.append(resqual)
             reserr = 0.5
             if '.' in pres:
                 reserr = 0.005
@@ -400,6 +397,7 @@ for page in generator:
             indoor = False
             field = False
             qcnt = None
+            multi = False
             if pcnt:
                 if pcnt not in cnt2wd:
                     print('Not in cnt2wd: {}'.format(pcnt))
@@ -430,6 +428,7 @@ for page in generator:
                     unit = pywikibot.ItemPage(repo, Q_METER)
                     qevnt = iaafe2wd_m[pevnt]
                 elif pevnt in iaafe2wd_pts:
+                    multi = True
                     field = False
                     reserr = 0.5
                     unit = pywikibot.ItemPage(repo, Q_POINTS)
@@ -495,7 +494,7 @@ for page in generator:
                                 break
                 if not qevntcomp:
                     qevntcomp_item = pywikibot.ItemPage(site)
-                    qevntcomp_label = '{} - {} {}'.format(ypcomp, 'Women\'s' if gender == Q_FEMALE else 'Men\'s', pywikibot.ItemPage(repo, qevnt).get()['labels']['en'])
+                    qevntcomp_label = '{} – {} {}'.format(ypcomp, 'Women\'s' if gender == Q_FEMALE else 'Men\'s', pywikibot.ItemPage(repo, qevnt).get()['labels']['en'])
                     print('CREATING: ' + qevntcomp_label)
                     qevntcomp_item.editEntity({
                         'labels': { 'en': qevntcomp_label },
@@ -556,11 +555,17 @@ for page in generator:
                 placequal.setTarget(pywikibot.WbQuantity(pplace, site = site))
                 quals.append(placequal)
             if pres:
-                if field:
+                if multi:
+                    presqualifier = pywikibot.Claim(repo, P_POINTS)
+                elif field:
                     presqualifier = pywikibot.Claim(repo, P_DISTANCE)
                 else:
                     presqualifier = pywikibot.Claim(repo, P_RACETIME)
-                presqualifier.setTarget(pywikibot.WbQuantity(pres, unit = unit, error = reserr, site = site))
+                if pres in perf2wd: # check for DNS / NM / ND
+                    presqualifier.setSnakType('novalue')
+                else:
+                    presqualifier.setSnakType('value')
+                    presqualifier.setTarget(pywikibot.WbQuantity(pres, unit = unit, error = reserr, site = site))
                 quals.append(presqualifier)
             page.addClaim(claim, summary = 'Adding {} race result'.format(y))
             incedits()
