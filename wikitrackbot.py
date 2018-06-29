@@ -209,79 +209,82 @@ iaafc2wd = {
     'Boston Marathon': 'Q826038',
 }
 
+# NOTE: ordered ( main event, male gendered, female gendered )
 iaafe2wd = {
-    '50 Metres': 'Q240356',
-    '50 Metres Hurdles': 'Q4639907',
-    '55 Metres': 'Q4640627',
-    '55 Metres Hurdles': 'Q4640620',
-    '60 Metres': 'Q246681',
-    '60 Metres Hurdles': 'Q1026754',
-    '100 Metres': 'Q164761',
-    '100 Metres Hurdles': 'Q164731',
-    '110 Metres Hurdles': 'Q170004',
-    '150 Metres': 'Q2807981',
-    '200 Metres': 'Q211155',
-    '300 Metres': 'Q2402434',
-    '400 Metres': 'Q334734',
-    '400 Metres Hurdles': 'Q231419',
-    '500 Metres': 'Q2817139',
-    '600 Metres': 'Q2817913',
-    '800 Metres': 'Q271008',
-    '1000 Metres': 'Q1629556',
-    '1500 Metres': 'Q191691',
-    'One Mile': 'Q943635',
-    '2000 Metres': 'Q211164',
-    '2000 Metres Steeplechase': 'Q30588012',
-    '3000 Metres': 'Q223779',
-    '3000 Metres Steeplechase': 'Q10437559',
-    '3000 Metres Race Walk': 'Q30588450',
-    'Two Miles': 'Q2815830',
-    '5000 Metres': 'Q240500',
-    '5000 Metres Race Walk': 'Q11187928',
-    '10,000 Metres': 'Q163892',
-    '10,000 Metres Race Walk': 'Q28444668',
-    '10 Kilometres': 'Q2774730',
-    '10 Kilometres Race Walk': 'Q26844349',
-    '15 Kilometres': 'Q19767716',
-    '10 Miles': 'Q2767252',
-    '20 Kilometres': 'Q19767716',
-    '20 Kilometres Race Walk': 'Q210673',
-    'Half Marathon': 'Q215677',
-    '30 Kilometres': 'Q54964282',
-    '35 Kilometres Race Walk': 'Q55234451',
-    'Marathon': 'Q40244',
-    '50 Kilometres': 'Q2817174',
-    '50 Kilometres Race Walk': 'Q240387',
-    '100 Kilometres': 'Q1847570',
-    'Short Race': 'Q500050',
-    'Long Race': 'Q500050',
-    'U20 Race': 'Q500050',
-    '4x100 Metres Relay': 'Q230061',
-    '4x200 Metres Relay': 'Q3114131',
-    'Medley Relay': 'Q2532187', # swedish
-    'Sprint Medley Relay': 'Q7581309',
-    '4x400 Metres Relay': 'Q230057',
-    '4x800 Metres Relay': 'Q744307',
-    'Distance Medley Relay': 'Q5282867',
-    '4x1500 Metres Relay': 'Q2076688',
+    '50 Metres': ( 'Q240356', 'Q55242741', 'Q55242785' ),
+    '50 Metres Hurdles': ( 'Q4639907', 'Q55242835', 'Q55242883' ),
+    '55 Metres': ( 'Q4640627', 'Q55242931', 'Q55242979' ),
+    '55 Metres Hurdles': ( 'Q4640620', 'Q55243099', 'Q55243145' ),
+    '60 Metres': ( 'Q246681', 'Q55243193', 'Q55243244' ),
+    '60 Metres Hurdles': ( 'Q1026754', 'Q55243293', 'Q55243345' ),
+    '100 Metres': ( 'Q164761', 'Q55243390', 'Q55243435' ),
+    '100 Metres Hurdles': ( 'Q164731', 'Q55243477', 'Q55243520' ),
+    '110 Metres Hurdles': ( 'Q170004', 'Q55243565', 'Q55243608' ),
+    '150 Metres': ( 'Q2807981', 'Q55243658', 'Q55243705' ),
+    '200 Metres': ( 'Q211155', 'Q55243755', 'Q55243804' ),
+    '300 Metres': ( 'Q2402434', 'Q55243851', 'Q55243894' ),
+    '400 Metres': ( 'Q334734', 'Q55243939', 'Q55243980' ),
+    '400 Metres Hurdles': ( 'Q231419', 'Q55244026', 'Q55244071' ),
+    '500 Metres': ( 'Q2817139', 'Q55244117', 'Q55244158' ),
+    '600 Metres': ( 'Q2817913', 'Q55244207', 'Q55244249' ),
+    '800 Metres': ( 'Q271008', 'Q55244298', 'Q55244345' ),
+    '1000 Metres': ( 'Q1629556', 'Q55244390', 'Q55244439' ),
+    '1500 Metres': ( 'Q191691', 'Q55244489', 'Q55244535' ),
+    'One Mile': ( 'Q943635', 'Q55244585', 'Q55244631' ),
+    '2000 Metres': ( 'Q211164', 'Q55244678', 'Q55244718' ),
+    '2000 Metres Steeplechase': ( 'Q30588012', 'Q55244765', 'Q55244808' ),
+    '3000 Metres': ( 'Q223779', 'Q55244852', 'Q55244891' ),
+    '3000 Metres Steeplechase': ( 'Q10437559', 'Q55244942', 'Q55244986' ),
+    '3000 Metres Race Walk': ( 'Q30588450', 'Q55245034', 'Q55245081' ),
+    'Two Miles': ( 'Q2815830', 'Q55245128', 'Q55245177' ),
+    '5000 Metres': ( 'Q240500', 'Q55245220', 'Q55245268' ),
+    '5000 Metres Race Walk': ( 'Q11187928', 'Q55245310', 'Q55245354' ),
+    '10,000 Metres': ( 'Q163892', 'Q55245399', 'Q55245440' ),
+    '10,000 Metres Race Walk': ( 'Q28444668', 'Q55245493', 'Q55245535' ),
+    '10 Kilometres': ( 'Q2774730', 'Q55245579', 'Q55245623' ),
+    '10 Kilometres Race Walk': ( 'Q26844349', 'Q55245670', 'Q55245711' ),
+    '15 Kilometres': ( 'Q19767716', 'Q55245745', 'Q55245778' ),
+    '10 Miles': ( 'Q2767252', 'Q55245809', 'Q55245841' ),
+    '20 Kilometres': ( 'Q19827858', 'Q55246102', 'Q55246136' ),
+    '20 Kilometres Race Walk': ( 'Q210673', 'Q55246165', 'Q55246190' ),
+    'Half Marathon': ( 'Q215677', 'Q55246222', 'Q55246259' ),
+    '30 Kilometres': ( 'Q54964282', 'Q55246292', 'Q55246317' ),
+    '35 Kilometres Race Walk': ( 'Q55234451', 'Q55246352', 'Q55246393' ),
+    'Marathon': ( 'Q40244', 'Q55246435', 'Q55246472' ),
+    '50 Kilometres': ( 'Q2817174', 'Q55246501', 'Q55246530' ),
+    '50 Kilometres Race Walk': ( 'Q240387', 'Q55246561', 'Q55246594' ),
+    '100 Kilometres': ( 'Q1847570', 'Q55246623', 'Q55246655' ),
+    'Cross Country': ( 'Q500050', 'Q55246682', 'Q55246713' ), # not used?
+    'Short Race': ( 'Q55247078', 'Q55247308', 'Q55247336' ),
+    'Long Race': ( 'Q55247140', 'Q55247363', 'Q55247390' ),
+    'U20 Race': ( 'Q55247191', 'Q55247419', 'Q55247449' ),
+    'Senior Race': ( 'Q55246937', 'Q55247480', 'Q55247513' ),
+    '4x100 Metres Relay': ( 'Q230061', 'Q55247536', 'Q55247559' ),
+    '4x200 Metres Relay': ( 'Q3114131', 'Q55247588', 'Q55247613' ),
+    'Medley Relay': ( 'Q2532187', 'Q55247637', 'Q55247662' ), # swedish
+    'Sprint Medley Relay': ( 'Q7581309', 'Q55247684', 'Q55247709' ),
+    '4x400 Metres Relay': ( 'Q230057', 'Q55247732', 'Q55247759' ),
+    '4x800 Metres Relay': ( 'Q744307', 'Q55247784', 'Q55247810' ),
+    'Distance Medley Relay': ( 'Q5282867', 'Q55247832', 'Q55247856' ),
+    '4x1500 Metres Relay': ( 'Q2076688', 'Q55247882', 'Q55247916' ),
 }
 
 iaafe2wd_m = {
-    'Pole Vault': 'Q185027',
-    'Javelin Throw': 'Q178108',
-    'Hammer Throw': 'Q184865',
-    'High Jump': 'Q165704',
-    'Long Jump': 'Q170737',
-    'Triple Jump': 'Q187204',
-    'Shot Put': 'Q180935',
-    'Discus Throw': 'Q182570',
-    '35libs Weight': 'Q259509',
+    'Pole Vault': ( 'Q185027', 'Q55247946', 'Q55247977' ),
+    'Javelin Throw': ( 'Q178108', 'Q55248012', 'Q55248046' ),
+    'Hammer Throw': ( 'Q184865', 'Q55248070', 'Q55248094' ),
+    'High Jump': ( 'Q165704', 'Q55248117', 'Q55248144' ),
+    'Long Jump': ( 'Q170737', 'Q55248168', 'Q55248192' ),
+    'Triple Jump': ( 'Q187204', 'Q55248213', 'Q55248239' ),
+    'Shot Put': ( 'Q180935', 'Q55248267', 'Q55248302' ),
+    'Discus Throw': ( 'Q182570', 'Q55248331', 'Q55248363' ),
+    '35libs Weight': ( 'Q259509', 'Q55248398', 'Q55248425' ),
 }
 
 iaafe2wd_pts = {
-    'Decathlon': 'Q184654',
-    'Heptathlon': 'Q243264',
-    'Pentathlon': 'Q24688986',
+    'Decathlon': ( 'Q184654', 'Q55248448', 'Q55248471' ),
+    'Heptathlon': ( 'Q243264', 'Q55248494', 'Q55248516' ),
+    'Pentathlon': ( 'Q24688986', 'Q55248540', 'Q55248562' ),
 }
 
 cnt2wd = { ine.split(',')[0].replace('_', ' '): ine.split(',')[-1] for ine in open('countries.csv').read().split('\n') }
@@ -309,6 +312,7 @@ iaaf2gen = { row[0]: row[1] for row in csv.reader(open('iaaf2gen.csv', newline =
 
 for page in generator:
     gender = None
+    gendernum = None
     iaafid = None
     aaid = None
     itemd = page.get()
@@ -333,6 +337,7 @@ for page in generator:
         if gender not in [ 'Men', 'Women' ]:
             print('skipped for error in gender')
             continue
+        gendernum = 2 if gender == 'Women' else 1
         gender = Q_FEMALE if gender == 'Women' else Q_MALE
     else:
         print('skipped for no gender')
@@ -414,6 +419,7 @@ for page in generator:
                 else:
                     print('not in rnd2wd: {}'.format(prace))
             qevnt = None
+            qevntg = None
             if pevnt:
                 if 'Indoor' in pevnt:
                     pevnt = pevnt.replace('Indoor', '').strip()
@@ -422,17 +428,20 @@ for page in generator:
                 if pevnt in iaafe2wd:
                     unit = pywikibot.ItemPage(repo, Q_SECONDS)
                     qevnt = iaafe2wd[pevnt]
+                    qevntg = iaafe2wd[pevnt][gendernum]
                 elif pevnt in iaafe2wd_m:
                     field = True
                     reserr = 0.005
                     unit = pywikibot.ItemPage(repo, Q_METER)
                     qevnt = iaafe2wd_m[pevnt]
+                    qevntg = iaafe2wd_m[pevnt][gendernum]
                 elif pevnt in iaafe2wd_pts:
                     multi = True
                     field = False
                     reserr = 0.5
                     unit = pywikibot.ItemPage(repo, Q_POINTS)
                     qevnt = iaafe2wd_pts[pevnt]
+                    qevntg = iaafe2wd_pts[pevnt][gendernum]
                 else:
                     print('could not find event: {}'.format(pevnt))
                     print(apiurl)
@@ -482,14 +491,7 @@ for page in generator:
                 if P_HASPART in qcomp_itemd['claims']:
                     for partclaim in qcomp_itemd['claims'][P_HASPART]:
                         if P_OBJECTHASROLE in partclaim.qualifiers:
-                            hasgender = False
-                            hasqevnt = False
-                            for role in partclaim.qualifiers[P_OBJECTHASROLE]:
-                                if role.getTarget().getID() == gender:
-                                    hasgender = True
-                                if role.getTarget().getID() == qevnt:
-                                    hasqevnt = True
-                            if hasgender and hasqevnt:
+                            if partclaim.qualifiers[P_OBJECTHASROLE][0].getID() == qevntg:
                                 qevntcomp = partclaim.getTarget().getID()
                                 break
                 if not qevntcomp:
@@ -506,21 +508,17 @@ for page in generator:
                     partclaim2.setTarget(pywikibot.ItemPage(repo, qevntcomp))
                     qcomp_item.addClaim(partclaim2, summary = 'Adding part of claim to athletics meeting')
                     incedits()
-                    rolequal_gender = pywikibot.Claim(repo, P_OBJECTHASROLE)
-                    rolequal_gender.setTarget(pywikibot.ItemPage(repo, gender))
-                    partclaim2.addQualifier(rolequal_gender, summary = 'Adding gender role to athletics event')
-                    incedits()
                     rolequal_event = pywikibot.Claim(repo, P_OBJECTHASROLE)
-                    rolequal_event.setTarget(pywikibot.ItemPage(repo, qevnt))
-                    partclaim2.addQualifier(rolequal_event, summary = 'Adding sports discipline role to athletics event')
+                    rolequal_event.setTarget(pywikibot.ItemPage(repo, qevntg))
+                    partclaim2.addQualifier(rolequal_event, summary = 'Adding gendered sport discipline role to athletics event')
                     incedits()
                     partofclaim = pywikibot.Claim(repo, P_PARTOF)
                     partofclaim.setTarget(pywikibot.ItemPage(repo, qcomp))
                     qevntcomp_item.addClaim(partofclaim, summary = 'Adding part of claim to athletics event')
                     incedits()
                     discclaim = pywikibot.Claim(repo, P_COMPCLASS)
-                    discclaim.setTarget(pywikibot.ItemPage(repo, qevnt))
-                    qevntcomp_item.addClaim(discclaim, summary = 'Adding sports discipline to athletics event')
+                    discclaim.setTarget(pywikibot.ItemPage(repo, qevntg))
+                    qevntcomp_item.addClaim(discclaim, summary = 'Adding gendered sports discipline to athletics event')
                     incedits()
                     genclaim = pywikibot.Claim(repo, P_COMPCLASS)
                     genclaim.setTarget(pywikibot.ItemPage(repo, gender))

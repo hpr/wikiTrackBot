@@ -91,7 +91,7 @@ evnts = {
     '10 Kilometres Race Walk': 'Q26844349',
     '15 Kilometres': 'Q19767716',
     '10 Miles': 'Q2767252',
-    '20 Kilometres': 'Q19767716',
+    '20 Kilometres': 'Q19827858',
     '20 Kilometres Race Walk': 'Q210673',
     'Half Marathon': 'Q215677',
     '30 Kilometres': 'Q54964282',
@@ -100,9 +100,11 @@ evnts = {
     '50 Kilometres': 'Q2817174',
     '50 Kilometres Race Walk': 'Q240387',
     '100 Kilometres': 'Q1847570',
-    'Short Race': 'Q500050',
-    'Long Race': 'Q500050',
-    'U20 Race': 'Q500050',
+    'Cross Country': 'Q500050', # not real
+    'Short Race': 'Q55247078',
+    'Long Race': 'Q55247140',
+    'U20 Race': 'Q55247191',
+    'Senior Race': 'Q55246937',
     '4x100 Metres Relay': 'Q230061',
     '4x200 Metres Relay': 'Q3114131',
     'Medley Relay': 'Q2532187', # swedish
