@@ -300,7 +300,7 @@ generator = site.preloadpages(
 
 generator = [ pywikibot.ItemPage(repo, 'Q1189') ]
 
-edits = 183
+edits = 0
 
 def incedits():
     global edits
@@ -427,20 +427,20 @@ for page in generator:
                 evntqualifier = pywikibot.Claim(repo, P_SPORTDISC)
                 if pevnt in iaafe2wd:
                     unit = pywikibot.ItemPage(repo, Q_SECONDS)
-                    qevnt = iaafe2wd[pevnt]
+                    qevnt = iaafe2wd[pevnt][0]
                     qevntg = iaafe2wd[pevnt][gendernum]
                 elif pevnt in iaafe2wd_m:
                     field = True
                     reserr = 0.005
                     unit = pywikibot.ItemPage(repo, Q_METER)
-                    qevnt = iaafe2wd_m[pevnt]
+                    qevnt = iaafe2wd_m[pevnt][0]
                     qevntg = iaafe2wd_m[pevnt][gendernum]
                 elif pevnt in iaafe2wd_pts:
                     multi = True
                     field = False
                     reserr = 0.5
                     unit = pywikibot.ItemPage(repo, Q_POINTS)
-                    qevnt = iaafe2wd_pts[pevnt]
+                    qevnt = iaafe2wd_pts[pevnt][0]
                     qevntg = iaafe2wd_pts[pevnt][gendernum]
                 else:
                     print('could not find event: {}'.format(pevnt))
