@@ -532,7 +532,7 @@ for page in generator:
                     incedits()
                     edateclaim = pywikibot.Claim(repo, P_POINTINTIME)
                     edateclaim.setTarget(pywikibot.WbTime(year = pdate.year, month = pdate.month, day = pdate.day))
-                    qevntcomp_itme.addClaim(edateclaim, summary = 'Adding date to athletics event')
+                    qevntcomp_item.addClaim(edateclaim, summary = 'Adding date to athletics event')
                     incedits()
                     instanceclass = pywikibot.Claim(repo, P_INSTANCEOF)
                     instanceclass.setTarget(pywikibot.ItemPage(repo, Q_ATHLETICSMEETING))
