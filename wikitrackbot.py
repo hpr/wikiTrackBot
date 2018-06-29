@@ -491,9 +491,9 @@ for page in generator:
                 if P_HASPART in qcomp_itemd['claims']:
                     for partclaim in qcomp_itemd['claims'][P_HASPART]:
                         if P_OBJECTHASROLE in partclaim.qualifiers and P_POINTINTIME in partclaim.qualifiers:
-                            if partclaim.qualifiers[P_OBJECTHASROLE][0].getID() == qevntg:
+                            if partclaim.qualifiers[P_OBJECTHASROLE][0].getTarget().getID() == qevntg:
                                 timeq = partclaim.qualifiers[P_POINTINTIME][0].getTarget()
-                                if timeq.year == pdate.year: # can't be more specific for prelim / finals on different days
+                                if int(timeq.year) == int(pdate.year): # can't be more specific for prelim / finals on different days
                                     qevntcomp = partclaim.getTarget().getID()
                                     break
                 if not qevntcomp:
