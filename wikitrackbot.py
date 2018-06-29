@@ -490,10 +490,12 @@ for page in generator:
                 qcomp_itemd = qcomp_item.get()
                 if P_HASPART in qcomp_itemd['claims']:
                     for partclaim in qcomp_itemd['claims'][P_HASPART]:
-                        if P_OBJECTHASROLE in partclaim.qualifiers:
+                        if P_OBJECTHASROLE in partclaim.qualifiers and P_POINTINTIME in partclaim.qualifiers:
                             if partclaim.qualifiers[P_OBJECTHASROLE][0].getID() == qevntg:
-                                qevntcomp = partclaim.getTarget().getID()
-                                break
+                                timeq = partclaim.qualifiers[P_POINTINTIME][0].getTarget()
+                                if timeq.year == pdate.year: # can't be more specific for prelim / finals on different days
+                                    qevntcomp = partclaim.getTarget().getID()
+                                    break
                 if not qevntcomp:
                     qevntcomp_item = pywikibot.ItemPage(site)
                     qevntcomp_label = '{} – {} {}'.format(ypcomp, 'Women\'s' if gender == Q_FEMALE else 'Men\'s', pywikibot.ItemPage(repo, qevnt).get()['labels']['en'])
@@ -512,6 +514,10 @@ for page in generator:
                     rolequal_event.setTarget(pywikibot.ItemPage(repo, qevntg))
                     partclaim2.addQualifier(rolequal_event, summary = 'Adding gendered sport discipline role to athletics event')
                     incedits()
+                    pointintimequal = pywikibot.Claim(repo, P_POINTINTIME)
+                    pointintimequal.setTarget(pywikibot.WbTime(year = pdate.year, month = pdate.month, day = pdate.day))
+                    partclaim2.addQualifier(pointintimequal, summary = 'Adding point in time qualifier to athletics event')
+                    incedits()
                     partofclaim = pywikibot.Claim(repo, P_PARTOF)
                     partofclaim.setTarget(pywikibot.ItemPage(repo, qcomp))
                     qevntcomp_item.addClaim(partofclaim, summary = 'Adding part of claim to athletics event')
@@ -523,6 +529,10 @@ for page in generator:
                     genclaim = pywikibot.Claim(repo, P_COMPCLASS)
                     genclaim.setTarget(pywikibot.ItemPage(repo, gender))
                     qevntcomp_item.addClaim(genclaim, summary = 'Adding gender to athletics event')
+                    incedits()
+                    edateclaim = pywikibot.Claim(repo, P_POINTINTIME)
+                    edateclaim.setTarget(pywikibot.WbTime(year = pdate.year, month = pdate.month, day = pdate.day))
+                    qevntcomp_itme.addClaim(edateclaim, summary = 'Adding date to athletics event')
                     incedits()
                     instanceclass = pywikibot.Claim(repo, P_INSTANCEOF)
                     instanceclass.setTarget(pywikibot.ItemPage(repo, Q_ATHLETICSMEETING))
