@@ -3,6 +3,7 @@
 import bs4
 import csv
 import time
+import json
 import pprint
 import iaafcc
 import datetime
@@ -207,6 +208,10 @@ iaafc2wd = {
     'Berlin ISTAF': 'Q703948',
     'Rovereto Palio Città della Quercia': 'Q3361438',
     'Boston Marathon': 'Q826038',
+
+    # 'New Balance Indoor Grand Prix': {
+    #     '2019': 'Q63657104',
+    # },
 }
 
 # NOTE: ordered ( main event, male gendered, female gendered )
@@ -298,7 +303,7 @@ generator = site.preloadpages(
     pageprops = True
 )
 
-generator = [ pywikibot.ItemPage(repo, 'Q1189') ]
+generator = [ pywikibot.ItemPage(repo, 'Q116052213') ] # drew piazza
 
 edits = 0
 
@@ -314,7 +319,6 @@ for page in generator:
     gender = None
     gendernum = None
     iaafid = None
-    aaid = None
     itemd = page.get()
     #pprint.pprint(itemd)
     print(itemd['labels']['en'] if 'en' in itemd['labels'] else itemd['labels'])
@@ -323,17 +327,16 @@ for page in generator:
     claim = pywikibot.Claim(repo, P_RESULTS)
     
     iaafid = itemd['claims'][P_IAAFID][0].getTarget()
-    iaafurl = 'https://www.iaaf.org/athletes/athlete=' + iaafid
-    print(iaafurl)
-    iaafs = bs4.BeautifulSoup(session.get(iaafurl).text, 'html.parser')
-    aaid = iaafs.find('div', { 'data-aaid': True })
-    if aaid:
-        aaid = aaid['data-aaid']
-    else:
-        print('skipped for no aaid')
+    if not iaafid:
+        print('skipped for no iaafid')
         continue
-    if iaafid in iaaf2gen:
-        gender = iaaf2gen[iaafid] # 'Men' or 'Women'
+    
+    iaafurl = 'https://www.worldathletics.org/athletes/athlete=' + iaafid
+    iaafs = bs4.BeautifulSoup(session.get(iaafurl).text, 'html.parser')
+    next_json = json.loads(iaafs.find('script', { 'id': '__NEXT_DATA__' }).string)
+
+    gender = next_json['props']['pageProps']['competitor']['basicData']['sexNameUrlSlug'].title()
+    if gender:
         if gender not in [ 'Men', 'Women' ]:
             print('skipped for error in gender')
             continue
@@ -342,9 +345,10 @@ for page in generator:
     else:
         print('skipped for no gender')
         continue
-    years = [ op['value'] for op in iaafs.find('select', { 'name': 'resultsByYear' }).find_all('option') ]
+
+    years = next_json['props']['pageProps']['competitor']['resultsByYear']['activeYears']
     for y in years:
-        apiurl = 'https://www.iaaf.org/data/GetCompetitorResultsByYearHtml?resultsByYear={}&resultsByYearOrderBy=date&aaId={}'.format(y, aaid)
+        apiurl = 'https://www.worldathletics.org/data/GetCompetitorResultsByYearHtml?resultsByYear={}&resultsByYearOrderBy=date&aaId={}'.format(y, iaafid)
         ysoup = bs4.BeautifulSoup(session.get(apiurl).text, 'html.parser')
         perfs = ysoup.find('tbody').find_all('tr')
         for p in perfs:
@@ -358,7 +362,8 @@ for page in generator:
 
             pdate = p.find('td', { 'data-th': 'Date' }).text.strip()
             pdate = datetime.datetime.strptime(pdate.title(), '%d %b %Y')
-            pcomp = p.find('td', { 'data-th': 'Competition' }).text.strip()
+            orig_pcomp = p.find('td', { 'data-th': 'Competition' }).text.strip()
+            pcomp = orig_pcomp.split(', ')[0]
             pevnt = p.find('td', { 'data-th': 'Event' }).text.strip()
             pcnt = iaafcc.iaafcc[p.find('td', { 'data-th': 'Cnt.' }).text.strip()]
             pcat = p.find('td', { 'data-th': 'Cat' }).text.strip()
@@ -460,11 +465,12 @@ for page in generator:
                 ypcomp = '{} {}'.format(y, pcomp)
                 if pcomp in iaafc2wd:
                     qcomp = iaafc2wd[pcomp]
-                    if type(qcomp) is dict:
+                    if type(qcomp) is dict and y in qcomp:
                         qcomp = qcomp[y]
                 elif ypcomp in cachedmeets:
                     qcomp = cachedmeets[ypcomp]
-                else:
+                
+                if not qcomp:
                     print('competition not found, creating: {}'.format(pcomp))
                     ypcomp_item = pywikibot.ItemPage(site)
                     ypcomp_item.editEntity({
@@ -485,6 +491,7 @@ for page in generator:
                     csv.writer(open('cachedmeets.csv', 'a', newline = '')).writerow([ ypcomp, qcomp ])
                     cachedmeets[ypcomp] = qcomp
                 # now we have qcomp, time to find or create qevntcomp
+                print(repo, qcomp)
                 qcomp_item = pywikibot.ItemPage(repo, qcomp)
                 qevntcomp = None
                 qcomp_itemd = qcomp_item.get()
